@@ -19,8 +19,8 @@ function todayISO(): string {
 export function TournamentList({ summaries, onOpen, onChanged }: Props) {
   const [name, setName] = useState('')
   const [date, setDate] = useState(todayISO())
-  const [swissRounds, setSwissRounds] = useState(3)
-  const [playoff, setPlayoff] = useState<'none' | 'top4'>('top4')
+  const [swissRounds, setSwissRounds] = useState(4)
+  const [playoff, setPlayoff] = useState<'none' | 'top2'>('top2')
   const [message, setMessage] = useState<{ kind: 'error' | 'success'; text: string } | null>(null)
   const fileInput = useRef<HTMLInputElement>(null)
 
@@ -89,7 +89,7 @@ export function TournamentList({ summaries, onOpen, onChanged }: Props) {
         </div>
         <div className="row">
           <div className="field">
-            <label htmlFor="new-rounds">Manches de qualification</label>
+            <label htmlFor="new-rounds">Rondes suisses</label>
             <input
               id="new-rounds"
               type="number"
@@ -104,9 +104,9 @@ export function TournamentList({ summaries, onOpen, onChanged }: Props) {
             <select
               id="new-playoff"
               value={playoff}
-              onChange={(e) => setPlayoff(e.target.value as 'none' | 'top4')}
+              onChange={(e) => setPlayoff(e.target.value as 'none' | 'top2')}
             >
-              <option value="top4">Demi-finales + finale (4 premiers)</option>
+              <option value="top2">Finale entre les 2 premiers</option>
               <option value="none">Aucune, classement direct</option>
             </select>
           </div>

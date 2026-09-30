@@ -13,8 +13,8 @@ async function createTournamentWithTeams(teamNames: string[][]) {
   render(<App />)
 
   await user.type(screen.getByLabelText('Nom'), 'Tournoi du vendredi')
-  await user.clear(screen.getByLabelText('Manches de qualification'))
-  await user.type(screen.getByLabelText('Manches de qualification'), '2')
+  await user.clear(screen.getByLabelText('Rondes suisses'))
+  await user.type(screen.getByLabelText('Rondes suisses'), '2')
   await user.click(screen.getByRole('button', { name: 'Créer le tournoi' }))
 
   await user.click(await screen.findByRole('tab', { name: 'Équipes' }))

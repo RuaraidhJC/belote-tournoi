@@ -1,8 +1,9 @@
 # Tournoi de belote
 
 Application de gestion de tournoi de **belote contrée** en **rondes suisses**,
-conforme au règlement de la Belote Contrée Parisienne (2019) et au déroulement
-type d'une soirée : 3 manches de qualification, demi-finales, finale.
+conforme au règlement de la Belote Contrée Parisienne (2019) : un nombre
+paramétrable de rondes suisses de qualification (4 par défaut), puis une
+finale entre les deux premières équipes du classement.
 
 Tout tourne dans le navigateur. Aucun serveur, aucun compte, hébergement gratuit.
 
@@ -10,7 +11,7 @@ Tout tourne dans le navigateur. Aucun serveur, aucun compte, hébergement gratui
 
 - **Inscription** des équipes de 2 joueurs, avec reconnaissance des joueurs
   déjà venus lors d'un tournoi précédent.
-- **Appariement en rondes suisses** : tirage au sort intégral à la 1re manche,
+- **Appariement en rondes suisses** : tirage au sort intégral à la 1re ronde,
   puis appariement par victoires et goal average, sans jamais rejouer un
   adversaire déjà rencontré tant qu'un autre appariement existe.
 - **Effectif impair** : une équipe est exempte à chaque manche et marque une
@@ -23,7 +24,7 @@ Tout tourne dans le navigateur. Aucun serveur, aucun compte, hébergement gratui
 - **Pénalités de retard** (200 points par tranche de 5 minutes) et **forfait**
   au bout de 30 minutes (partie perdue, goal average de −1001).
 - **Classement** en direct, victoires puis goal average.
-- **Phase finale** : 1re contre 4e, 2e contre 3e, puis finale.
+- **Finale** entre les deux premières équipes du classement des rondes suisses.
 - **Statistiques joueurs** cumulées sur tous les tournois enregistrés.
 - **Export / import JSON** pour sauvegarder ou transférer les données.
 
@@ -32,7 +33,7 @@ Tout tourne dans le navigateur. Aucun serveur, aucun compte, hébergement gratui
 ```sh
 npm install
 npm run dev      # http://localhost:5173
-npm test         # 73 tests
+npm test         # 74 tests
 npm run build    # génère dist/
 ```
 
@@ -55,15 +56,15 @@ personnalisé sans frais.
 
 ## Utilisation le soir du tournoi
 
-1. **Créer le tournoi** (nom, date, nombre de manches, phase finale).
+1. **Créer le tournoi** (nom, date, nombre de rondes suisses, phase finale).
 2. Onglet **Équipes** : inscrire les équipes. La composition se fige dès le
    premier tirage.
 3. Onglet **Manches** : *Tirer la manche 1*, annoncer les tables.
 4. Saisir le score de chaque partie au fil de l'eau. Le classement se met à
    jour automatiquement.
 5. Une fois tous les scores saisis, *Tirer la manche 2*, et ainsi de suite.
-6. Après la dernière manche : *Tirer les demi-finales*, puis *Composer la
-   finale*.
+6. Après la dernière ronde : *Lancer la finale*, qui oppose les deux premières
+   équipes du classement.
 
 Une erreur de saisie se corrige avec **Rouvrir** sur la partie concernée. Un
 tirage malheureux s'annule avec **Annuler la manche**.
@@ -78,7 +79,7 @@ src/
   domain/          logique métier, pure et testée, sans dépendance à React
     types.ts       modèle de données
     scoring.ts     barème de la belote contrée (§4 du règlement)
-    swiss.ts       appariement en rondes suisses, phase finale
+    swiss.ts       appariement en rondes suisses, finale
     standings.ts   classement
     tournament.ts  opérations sur un tournoi (tirage, saisie, annulation)
     stats.ts       statistiques joueurs multi-tournois

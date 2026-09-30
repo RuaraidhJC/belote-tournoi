@@ -9,9 +9,8 @@
  * le groupe suivant, conformément au règlement.
  */
 
-import { resolveMatch } from './scoring'
 import { compareStandings } from './standings'
-import type { Id, Match, Standing } from './types'
+import type { Id, Standing } from './types'
 
 export type Rng = () => number
 
@@ -153,28 +152,14 @@ function pairWithoutRematch(
   return null
 }
 
-/** Appariements de la phase finale : 1re contre 4e, 2e contre 3e. */
-export function computeSemifinals(standings: Standing[]): Pairing[] {
-  if (standings.length < 4) {
-    throw new Error(`Une phase finale à 4 demande au moins 4 équipes, ${standings.length} inscrites`)
+/**
+ * Appariement de la finale : les deux premières équipes du classement
+ * à l'issue des rondes suisses.
+ */
+export function computeFinalPairing(standings: Standing[]): Pairing {
+  if (standings.length < 2) {
+    throw new Error(`Une finale demande au moins 2 équipes, ${standings.length} inscrites`)
   }
-  const [first, second, third, fourth] = standings
-  return [
-    { teamAId: first!.teamId, teamBId: fourth!.teamId, isRematch: false },
-    { teamAId: second!.teamId, teamBId: third!.teamId, isRematch: false },
-  ]
-}
-
-/** Appariement de la finale, à partir des deux demi-finales jouées. */
-export function computeFinal(semifinals: Match[], forfaitGoalAverage: number): Pairing {
-  if (semifinals.length !== 2) {
-    throw new Error(`La finale attend 2 demi-finales, ${semifinals.length} fournies`)
-  }
-  const winners = semifinals.map((m) => {
-    if (m.status !== 'done') throw new Error('Les deux demi-finales doivent être terminées')
-    const winner = resolveMatch(m, forfaitGoalAverage).winnerId
-    if (!winner) throw new Error('Une demi-finale ne peut pas se terminer sur une égalité')
-    return winner
-  })
-  return { teamAId: winners[0]!, teamBId: winners[1]!, isRematch: false }
+  const [first, second] = standings
+  return { teamAId: first!.teamId, teamBId: second!.teamId, isRematch: false }
 }

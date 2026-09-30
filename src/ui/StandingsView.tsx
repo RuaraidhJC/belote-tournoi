@@ -15,7 +15,7 @@ function signed(n: number): string {
 export function StandingsView({ tournament }: Props) {
   const standings = computeStandings(tournament)
   const winner = tournamentWinner(tournament)
-  const qualifies = tournament.config.playoff === 'top4' ? 4 : 0
+  const qualifies = tournament.config.playoff === 'top2' ? 2 : 0
 
   if (standings.length === 0) {
     return <p className="empty">Aucune équipe inscrite.</p>
@@ -69,8 +69,7 @@ export function StandingsView({ tournament }: Props) {
 
         {qualifies > 0 && standings.length >= qualifies && (
           <p className="small muted" style={{ marginBottom: 0 }}>
-            Les {qualifies} premières équipes (surlignées) disputent les demi-finales : la 1re
-            contre la 4e, la 2e contre la 3e.
+            Les {qualifies} premières équipes (surlignées) disputent la finale.
           </p>
         )}
       </div>

@@ -5,7 +5,7 @@
 
 import { resolveMatch, totalFromDonnes } from './scoring'
 import { computeStandings } from './standings'
-import { computeFinal, computePairings, computeSemifinals, type Pairing, type Rng } from './swiss'
+import { computeFinalPairing, computePairings, type Pairing, type Rng } from './swiss'
 import {
   DEFAULT_CONFIG,
   type Donne,
@@ -66,7 +66,6 @@ export function renameTeam(tournament: Tournament, teamId: Id, name: string): To
 
 export type NextStep =
   | { kind: 'swiss'; roundNumber: number }
-  | { kind: 'semifinal' }
   | { kind: 'final' }
   | { kind: 'done' }
   | { kind: 'blocked'; reason: string }
@@ -82,12 +81,7 @@ export function nextStep(tournament: Tournament): NextStep {
   const swissRounds = rounds.filter((r) => r.kind === 'swiss')
   const pending = rounds.find((r) => r.matches.some((m) => m.status === 'pending'))
   if (pending) {
-    const label =
-      pending.kind === 'swiss'
-        ? `la manche ${pending.number}`
-        : pending.kind === 'semifinal'
-          ? 'les demi-finales'
-          : 'la finale'
+    const label = pending.kind === 'swiss' ? `la manche ${pending.number}` : 'la finale'
     return { kind: 'blocked', reason: `Tous les scores de ${label} doivent être saisis` }
   }
 
@@ -96,11 +90,6 @@ export function nextStep(tournament: Tournament): NextStep {
   }
 
   if (config.playoff === 'none') return { kind: 'done' }
-
-  if (teams.length < 4) {
-    return { kind: 'blocked', reason: 'La phase finale à 4 demande au moins 4 équipes' }
-  }
-  if (!rounds.some((r) => r.kind === 'semifinal')) return { kind: 'semifinal' }
   if (!rounds.some((r) => r.kind === 'final')) return { kind: 'final' }
   return { kind: 'done' }
 }
@@ -146,14 +135,10 @@ export function startNextRound(tournament: Tournament, rng?: Rng): Tournament {
       byesByTeam: new Map(standings.map((s) => [s.teamId, s.byes])),
       ...(rng ? { rng } : {}),
     })
-  } else if (step.kind === 'semifinal') {
-    number = tournament.config.swissRounds + 1
-    pairings = computeSemifinals(standings)
   } else {
-    number = tournament.config.swissRounds + 2
-    const semis = tournament.rounds.find((r) => r.kind === 'semifinal')
-    if (!semis) throw new Error('Les demi-finales doivent être jouées avant la finale')
-    pairings = [computeFinal(semis.matches, tournament.config.forfaitGoalAverage)]
+    // La finale oppose les deux premiers du classement des rondes suisses.
+    number = tournament.config.swissRounds + 1
+    pairings = [computeFinalPairing(standings)]
   }
 
   const round: Round = {

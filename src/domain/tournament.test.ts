@@ -58,26 +58,38 @@ describe('cycle de vie du tournoi', () => {
     expect(() => startNextRound(t)).toThrow(/scores/)
   })
 
-  it('enchaîne 3 rondes suisses puis demi-finales puis finale', () => {
+  it('enchaîne 4 rondes suisses par défaut puis la finale', () => {
     let t = withTeams(8)
+    expect(t.config.swissRounds).toBe(4)
+    expect(t.config.playoff).toBe('top2')
 
-    for (let round = 1; round <= 3; round++) {
+    for (let round = 1; round <= 4; round++) {
       t = startNextRound(t)
       expect(nextStep(t).kind).toBe('blocked')
       t = playAllPending(t)
     }
 
-    expect(nextStep(t)).toEqual({ kind: 'semifinal' })
+    expect(nextStep(t)).toEqual({ kind: 'final' })
+
+    // La finale oppose les deux premiers du classement des rondes suisses.
+    const qualified = computeStandings(t).slice(0, 2).map((r) => r.teamId)
     t = startNextRound(t)
-    expect(t.rounds.at(-1)!.matches).toHaveLength(2)
+    const final = t.rounds.at(-1)!
+    expect(final.kind).toBe('final')
+    expect(final.matches).toHaveLength(1)
+    expect([final.matches[0]!.teamAId, final.matches[0]!.teamBId]).toEqual(qualified)
+
     t = playAllPending(t)
+    expect(nextStep(t)).toEqual({ kind: 'done' })
+    expect(tournamentWinner(t)).toBe(final.matches[0]!.teamAId)
+  })
+
+  it('permet une finale avec seulement 2 équipes inscrites', () => {
+    let t = withTeams(2, { swissRounds: 1 })
+    t = playAllPending(startNextRound(t))
 
     expect(nextStep(t)).toEqual({ kind: 'final' })
-    t = startNextRound(t)
-    expect(t.rounds.at(-1)!.matches).toHaveLength(1)
-    t = playAllPending(t)
-
-    expect(nextStep(t)).toEqual({ kind: 'done' })
+    t = playAllPending(startNextRound(t))
     expect(tournamentWinner(t)).not.toBeNull()
   })
 
@@ -87,6 +99,20 @@ describe('cycle de vie du tournoi', () => {
 
     expect(nextStep(t)).toEqual({ kind: 'done' })
     expect(tournamentWinner(t)).toBe(computeStandings(t)[0]!.teamId)
+  })
+
+  it('nomme le vainqueur de la finale, pas le premier du classement suisse', () => {
+    let t = withTeams(4, { swissRounds: 1 })
+    t = playAllPending(startNextRound(t))
+
+    const [first, second] = computeStandings(t)
+    t = startNextRound(t)
+    const final = t.rounds.at(-1)!.matches[0]!
+
+    // Le deuxième du classement renverse le premier en finale.
+    t = recordScore(t, final.id, { scoreA: 500, scoreB: 1500 })
+    expect(final.teamAId).toBe(first!.teamId)
+    expect(tournamentWinner(t)).toBe(second!.teamId)
   })
 
   it('exempte une équipe sur un effectif impair, sans score à saisir', () => {

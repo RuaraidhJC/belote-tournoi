@@ -18,7 +18,6 @@ interface Props {
 }
 
 function roundTitle(round: Round): string {
-  if (round.kind === 'semifinal') return 'Demi-finales'
   if (round.kind === 'final') return 'Finale'
   return `Manche ${round.number}`
 }
@@ -30,11 +29,9 @@ export function RoundsView({ tournament, apply }: Props) {
   const stepLabel =
     step.kind === 'swiss'
       ? `Tirer la manche ${step.roundNumber}`
-      : step.kind === 'semifinal'
-        ? 'Tirer les demi-finales'
-        : step.kind === 'final'
-          ? 'Composer la finale'
-          : null
+      : step.kind === 'final'
+        ? 'Lancer la finale'
+        : null
 
   return (
     <>

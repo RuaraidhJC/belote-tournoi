@@ -52,7 +52,7 @@ export interface Donne {
   capotRealized: boolean
 }
 
-export type MatchKind = 'swiss' | 'semifinal' | 'final'
+export type MatchKind = 'swiss' | 'final'
 
 /**
  * Une partie. `teamBId` à null signifie que `teamAId` est exempte
@@ -87,10 +87,10 @@ export interface Round {
 }
 
 export interface TournamentConfig {
-  /** Nombre de manches de qualification (3 dans le règlement de référence). */
+  /** Nombre de rondes suisses de qualification. */
   swissRounds: number
-  /** Phase finale après les rondes suisses. */
-  playoff: 'none' | 'top4'
+  /** Phase finale : `top2` oppose les deux premiers du classement. */
+  playoff: 'none' | 'top2'
   /** Pénalité de retard, en points, par tranche de 5 minutes. */
   latePenaltyPer5Min: number
   /** Goal average infligé à une équipe forfait. */
@@ -98,8 +98,8 @@ export interface TournamentConfig {
 }
 
 export const DEFAULT_CONFIG: TournamentConfig = {
-  swissRounds: 3,
-  playoff: 'top4',
+  swissRounds: 4,
+  playoff: 'top2',
   latePenaltyPer5Min: 200,
   forfaitGoalAverage: 1001,
 }

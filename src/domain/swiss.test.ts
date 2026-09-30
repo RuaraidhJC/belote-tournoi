@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { computeFinal, computePairings, computeSemifinals, shuffle } from './swiss'
+import { computeFinalPairing, computePairings, shuffle } from './swiss'
 import { computeStandings } from './standings'
 import type { Match, Standing, Tournament } from './types'
 import { DEFAULT_CONFIG } from './types'
@@ -168,55 +168,25 @@ describe('manches suivantes — appariement par victoires puis goal average', ()
 })
 
 describe('phase finale', () => {
-  it('oppose la 1re à la 4e et la 2e à la 3e', () => {
-    const teams = ['A', 'B', 'C', 'D', 'E'].map((t, i) =>
-      standing({ teamId: t, wins: 5 - i }),
-    )
-    expect(computeSemifinals(teams)).toEqual([
-      { teamAId: 'A', teamBId: 'D', isRematch: false },
-      { teamAId: 'B', teamBId: 'C', isRematch: false },
-    ])
-  })
-
-  it('refuse une phase finale à moins de 4 équipes', () => {
-    expect(() => computeSemifinals([standing({ teamId: 'A' })])).toThrow()
-  })
-
-  it('compose la finale avec les deux vainqueurs de demi-finale', () => {
-    const sf = (id: string, a: string, b: string, sa: number, sb: number): Match => ({
-      id,
-      kind: 'semifinal',
-      roundNumber: 1,
-      teamAId: a,
-      teamBId: b,
-      scoreA: sa,
-      scoreB: sb,
-      penaltyA: 0,
-      penaltyB: 0,
-      forfaitTeamId: null,
-      donnes: [],
-      status: 'done',
-    })
-    const final = computeFinal([sf('1', 'A', 'D', 900, 800), sf('2', 'B', 'C', 700, 1100)], 1001)
-    expect(final).toEqual({ teamAId: 'A', teamBId: 'C', isRematch: false })
-  })
-
-  it('refuse une finale tant qu’une demi-finale n’est pas jouée', () => {
-    const pending: Match = {
-      id: '1',
-      kind: 'semifinal',
-      roundNumber: 1,
+  it('oppose les deux premiers du classement', () => {
+    const teams = ['A', 'B', 'C', 'D'].map((t, i) => standing({ teamId: t, wins: 4 - i }))
+    expect(computeFinalPairing(teams)).toEqual({
       teamAId: 'A',
-      teamBId: 'D',
-      scoreA: 0,
-      scoreB: 0,
-      penaltyA: 0,
-      penaltyB: 0,
-      forfaitTeamId: null,
-      donnes: [],
-      status: 'pending',
-    }
-    expect(() => computeFinal([pending, pending], 1001)).toThrow()
+      teamBId: 'B',
+      isRematch: false,
+    })
+  })
+
+  it('compose la finale même si les deux finalistes se sont déjà rencontrés', () => {
+    const teams = [
+      standing({ teamId: 'A', wins: 3, opponentIds: ['B'] }),
+      standing({ teamId: 'B', wins: 2, opponentIds: ['A'] }),
+    ]
+    expect(computeFinalPairing(teams).teamBId).toBe('B')
+  })
+
+  it('refuse une finale à moins de 2 équipes', () => {
+    expect(() => computeFinalPairing([standing({ teamId: 'A' })])).toThrow()
   })
 })
 
